@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pegawaiku - Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+<style>
+  :root{--bg:#f7f6f2;--surface:#fbfbf9;--surface2:#f1efe9;--border:#d4d1ca;--text:#28251d;--muted:#6f6d67;--primary:#01696f;--success:#437a22;--warn:#964219;--danger:#a13544;--radius:14px;--radius-lg:18px;--shadow:0 10px 24px rgba(20,20,20,.08)}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{padding:24px;background:var(--surface);border-right:1px solid var(--border)}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+  .brand svg{width:38px;height:38px;color:var(--primary)}
+  .brand h1{margin:0;font-size:1.25rem}
+  .brand p{margin:0;color:var(--muted);font-size:.8rem}
+  .nav a{display:block;padding:12px 14px;border-radius:var(--radius);text-decoration:none;color:var(--text);margin-bottom:6px;border:1px solid transparent;font-size:.95rem}
+  .nav a.active,.nav a:hover{background:var(--surface2);border-color:var(--border)}
+  .main{padding:24px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .top h2{margin:0;font-size:1.6rem}
+  .top p{margin:6px 0 0;color:var(--muted)}
+  .btn{padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:20px}
+  .cols2{grid-template-columns:1fr 1fr}
+  .cols3{grid-template-columns:repeat(3,1fr)}
+  .cols4{grid-template-columns:repeat(4,1fr)}
+  .label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .value{font-size:1.8rem;font-weight:700;margin-top:6px}
+  .status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+  .ok{background:#e8f1e3;color:var(--success)}.wait{background:#f5ebe3;color:var(--warn)}.bad{background:#f7e7ea;color:var(--danger)}.info{background:#ebf3f3;color:var(--primary)}
+  .table{width:100%;border-collapse:collapse;margin-top:12px}
+  .table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:.92rem;vertical-align:top}
+  .table th{color:var(--muted)}
+  .field{display:grid;gap:8px;margin-bottom:14px}
+  .field input,.field select,.field textarea{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;font:inherit}
+  .progress{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-top:8px}
+  .progress span{display:block;height:100%;background:var(--primary);border-radius:999px}
+  .muted{color:var(--muted)}
+  .item{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .item:last-child{border-bottom:0;padding-bottom:0}
+  .kpi{background:var(--surface2);border-radius:var(--radius);padding:16px}
+  .hero{padding:60px 24px;text-align:center;background:var(--surface);border-bottom:1px solid var(--border)}
+  .hero h1{margin:0;font-size:2rem}
+  .hero p{margin:12px 0 0;color:var(--muted)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px;margin:40px auto;padding:0 24px}
+  .role-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;box-shadow:var(--shadow)}
+  .role-card h3{margin:12px 0 6px}
+  .role-card p{color:var(--muted);font-size:.92rem}
+  .login-box{max-width:420px;margin:60px auto;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+  .login-box h2{margin-top:0}
+  .btn-block{width:100%;margin-top:8px}
+  .note{font-size:.9rem;color:var(--muted)}
+  @media(max-width:980px){.app{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid var(--border)}.cols2,.cols3,.cols4,.cards{grid-template-columns:1fr}}
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="10" width="20" height="44" rx="8" stroke="currentColor" stroke-width="4"/><rect x="36" y="10" width="20" height="28" rx="8" stroke="currentColor" stroke-width="4"/></svg>
+        <div><h1>Pegawaiku</h1><p>Admin SDM</p></div>
+      </div>
+      <nav class="nav">
+        <a class="active" href="./admin-dashboard.html">Dashboard</a>
+        <a href="./admin-pegawai.html">Data Pegawai</a>
+        <a href="./admin-presensi.html">Presensi</a>
+        <a href="./admin-cuti.html">Cuti / Izin</a>
+        <a href="./admin-laporan.html">Laporan</a>
+        <a href="./admin-program.html">Program & Anggaran</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="top">
+        <div><h2>Dashboard Admin</h2><p>Ringkasan operasional harian Direktorat Kursus.</p></div>
+        <a href="./login.html" class="btn" style="text-decoration:none">Logout</a>
+      </div>
+      <div class="grid cols4">
+        <div class="card"><div class="label">Total pegawai</div><div class="value">48</div><span class="status ok">Aktif</span></div>
+        <div class="card"><div class="label">Hadir hari ini</div><div class="value">39</div><span class="status ok">81%</span></div>
+        <div class="card"><div class="label">Cuti diproses</div><div class="value">6</div><span class="status wait">Menunggu</span></div>
+        <div class="card"><div class="label">Serapan anggaran</div><div class="value">58%</div><span class="status info">3 program</span></div>
+      </div>
+      <div class="grid cols2" style="margin-top:20px">
+        <div class="card">
+          <h3 style="margin-top:0">Presensi hari ini</h3>
+          <table class="table">
+            <thead><tr><th>Nama</th><th>Unit</th><th>Jam</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Ayu Lestari</td><td>Kepegawaian</td><td>07:42</td><td><span class="status ok">Hadir</span></td></tr>
+              <tr><td>Rizky Maulana</td><td>Program</td><td>07:55</td><td><span class="status ok">Hadir</span></td></tr>
+              <tr><td>Dewi Kartika</td><td>Keuangan</td><td>-</td><td><span class="status wait">Izin</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0">Pengajuan terbaru</h3>
+          <div class="item"><div><strong>Cuti - Siti Rahma</strong><div class="muted">19–21 Juni</div></div><span class="status wait">Menunggu</span></div>
+          <div class="item"><div><strong>Izin - Bima Aditya</strong><div class="muted">17 Juni</div></div><span class="status ok">Disetujui</span></div>
+          <div class="item"><div><strong>Cuti - Nisa Putri</strong><div class="muted">24 Juni</div></div><span class="status bad">Ditolak</span></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
