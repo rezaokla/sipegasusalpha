@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pegawaiku - Dashboard Pegawai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+<style>
+  :root{--bg:#f7f6f2;--surface:#fbfbf9;--surface2:#f1efe9;--border:#d4d1ca;--text:#28251d;--muted:#6f6d67;--primary:#01696f;--success:#437a22;--warn:#964219;--danger:#a13544;--radius:14px;--radius-lg:16px;--shadow:0 2px 8px rgba(0,0,0,0.08)}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{padding:24px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+  .brand svg{width:38px;height:38px;color:var(--primary)}
+  .brand h1{margin:0;font-size:1.25rem}
+  .brand p{margin:0;color:var(--muted);font-size:.8rem}
+  .nav a{display:block;padding:12px 14px;border-radius:var(--radius);text-decoration:none;color:var(--text);margin-bottom:6px;border:1px solid transparent;font-size:.95rem;transition:all 0.2s}
+  .nav a.active,.nav a:hover{background:var(--surface2);border-color:var(--border)}
+  .main{padding:24px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .top h2{margin:0;font-size:1.6rem}
+  .top p{margin:6px 0 0;color:var(--muted)}
+  .btn{padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer;transition:all 0.2s;font-size:.95rem}
+  .btn:hover{background:var(--surface2);border-color:var(--border)}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn-primary:hover{background:#014e55;border-color:#014e55}
+  .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .btn-secondary{background:var(--surface2);color:var(--text);border-color:var(--border)}
+  .btn-small{padding:8px 12px;font-size:.85rem}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:20px}
+  .cols2{grid-template-columns:1fr 1fr}
+  .cols3{grid-template-columns:repeat(3,1fr)}
+  .label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .value{font-size:1.8rem;font-weight:700;margin-top:6px}
+  .status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+  .ok{background:#e8f1e3;color:var(--success)}.wait{background:#f5ebe3;color:var(--warn)}.bad{background:#f7e7ea;color:var(--danger)}.info{background:#ebf3f3;color:var(--primary)}
+  .table{width:100%;border-collapse:collapse;margin-top:12px}
+  .table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:.92rem;vertical-align:top}
+  .table th{color:var(--muted);font-weight:600}
+  .table tr:hover{background:var(--surface2)}
+  .field{display:grid;gap:8px;margin-bottom:14px}
+  .field label{font-weight:500;font-size:.9rem}
+  .field input,.field select,.field textarea{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;font:inherit;color:var(--text)}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(1,105,111,0.1)}
+  .muted{color:var(--muted)}
+  
+  /* Modal */
+  .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+  .modal.active{display:flex}
+  .modal-content{background:var(--surface);border-radius:var(--radius-lg);padding:28px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px rgba(0,0,0,0.15)}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .modal-header h3{margin:0;font-size:1.3rem}
+  .close-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .close-btn:hover{color:var(--text)}
+  .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+  
+  /* Alert */
+  .alert{padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;font-size:.92rem}
+  .alert-success{background:#e8f1e3;color:var(--success);border:1px solid #d1e6c4}
+  .alert-danger{background:#f7e7ea;color:var(--danger);border:1px solid #f0d4da}
+  .alert-info{background:#ebf3f3;color:var(--primary);border:1px solid #d6e7e9}
+  .alert-warn{background:#f5ebe3;color:var(--warn);border:1px solid #f0e4d4}
+  
+  /* Loading */
+  .loading{opacity:0.6;pointer-events:none}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  @media(max-width:980px){
+    .app{grid-template-columns:1fr}
+    .sidebar{border-right:0;border-bottom:1px solid var(--border);position:relative;height:auto}
+    .cols2,.cols3{grid-template-columns:1fr}
+  }
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="10" width="20" height="44" rx="8" stroke="currentColor" stroke-width="4"/><rect x="36" y="10" width="20" height="28" rx="8" stroke="currentColor" stroke-width="4"/></svg>
+        <div><h1>Pegawaiku</h1><p id="userRole">Pegawai</p></div>
+      </div>
+      <nav class="nav">
+        <a href="./pegawai-dashboard.html" class="active">Dashboard</a>
+        <a href="./pegawai-cuti.html">Pengajuan Cuti</a>
+        <a href="./pegawai-program.html">Program</a>
+      </nav>
+    </aside>
+    
+    <main class="main">
+      <div class="top">
+        <div>
+          <h2>Dashboard Pegawai</h2>
+          <p>Informasi cuti dan pengajuan Anda</p>
+        </div>
+        <button class="btn" onclick="logout()">Logout</button>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <div class="grid cols3">
+        <div class="card">
+          <div class="label">Cuti Tahunan</div>
+          <div class="value" id="annualLeave">-</div>
+          <span class="status ok">Hari Kerja</span>
+        </div>
+        <div class="card">
+          <div class="label">Cuti Terpakai</div>
+          <div class="value" id="usedLeave">-</div>
+          <span class="status info" id="usedStatus">-</span>
+        </div>
+        <div class="card">
+          <div class="label">Sisa Cuti</div>
+          <div class="value" id="remainingLeave">-</div>
+          <span class="status" id="remainingStatus">-</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h3 style="margin:0">Riwayat Pengajuan Cuti</h3>
+          <a href="./pegawai-cuti.html" class="btn btn-primary">+ Ajukan Cuti</a>
+        </div>
+
+        <div style="overflow-x:auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Tipe</th>
+                <th>Hari</th>
+                <th>Status</th>
+                <th>Alasan</th>
+              </tr>
+            </thead>
+            <tbody id="leaveTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:40px"><span class="spinner"></span> Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    window.addEventListener('load', async () => {
+      await checkAuth();
+      await loadLeaveBalance();
+      await loadMyLeaves();
+    });
+
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await response.json();
+        if (data.user.role !== 'pegawai' && data.user.role !== 'pimpinan') {
+          alert('Halaman ini hanya untuk pegawai');
+          window.location.href = '/';
+        }
+      } catch (error) {
+        window.location.href = '/login.html';
+      }
+    }
+
+    async function loadLeaveBalance() {
+      try {
+        const response = await fetch('/api/leaves/balance');
+        if (!response.ok) throw new Error('Gagal memuat saldo cuti');
+        
+        const data = await response.json();
+        const balance = data.balance;
+
+        if (balance) {
+          document.getElementById('annualLeave').textContent = balance.annualLeave;
+          document.getElementById('usedLeave').textContent = balance.usedLeave;
+          document.getElementById('remainingLeave').textContent = balance.remainingLeave;
+
+          // Set status warna untuk sisa cuti
+          const remainingStatus = document.getElementById('remainingStatus');
+          if (balance.remainingLeave >= 7) {
+            remainingStatus.className = 'status ok';
+            remainingStatus.textContent = 'Cukup';
+          } else if (balance.remainingLeave >= 3) {
+            remainingStatus.className = 'status wait';
+            remainingStatus.textContent = 'Terbatas';
+          } else if (balance.remainingLeave > 0) {
+            remainingStatus.className = 'status bad';
+            remainingStatus.textContent = 'Sedikit';
+          } else {
+            remainingStatus.className = 'status bad';
+            remainingStatus.textContent = 'Habis';
+          }
+        }
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      }
+    }
+
+    async function loadMyLeaves() {
+      try {
+        const response = await fetch('/api/leaves/my-requests');
+        if (!response.ok) throw new Error('Gagal memuat riwayat cuti');
+        
+        const data = await response.json();
+        const leaves = data.requests || [];
+        renderLeaveTable(leaves);
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      }
+    }
+
+    function renderLeaveTable(leaves) {
+      const tbody = document.getElementById('leaveTableBody');
+      
+      if (leaves.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px">Belum ada pengajuan cuti</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = leaves.map(leave => `
+        <tr>
+          <td>
+            ${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}
+          </td>
+          <td>${leave.type === 'cuti' ? 'Cuti' : 'Izin'}</td>
+          <td>${leave.totalDays} hari</td>
+          <td>
+            <span class="status ${getStatusClass(leave.status)}">${getStatusLabel(leave.status)}</span>
+          </td>
+          <td><small class="muted">${leave.reason}</small></td>
+        </tr>
+      `).join('');
+    }
+
+    function getStatusLabel(status) {
+      const labels = {
+        'pending': 'Menunggu',
+        'approved': 'Disetujui',
+        'rejected': 'Ditolak',
+        'cancelled': 'Dibatalkan'
+      };
+      return labels[status] || status;
+    }
+
+    function getStatusClass(status) {
+      if (status === 'approved') return 'ok';
+      if (status === 'rejected' || status === 'cancelled') return 'bad';
+      return 'wait';
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
