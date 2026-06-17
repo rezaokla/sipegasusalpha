@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pegawaiku - Manajemen User</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+<style>
+  :root{--bg:#f7f6f2;--surface:#fbfbf9;--surface2:#f1efe9;--border:#d4d1ca;--text:#28251d;--muted:#6f6d67;--primary:#01696f;--success:#437a22;--warn:#964219;--danger:#a13544;--radius:14px;--radius-lg:16px;--shadow:0 2px 8px rgba(0,0,0,0.08)}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{padding:24px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+  .brand svg{width:38px;height:38px;color:var(--primary)}
+  .brand h1{margin:0;font-size:1.25rem}
+  .brand p{margin:0;color:var(--muted);font-size:.8rem}
+  .nav a{display:block;padding:12px 14px;border-radius:var(--radius);text-decoration:none;color:var(--text);margin-bottom:6px;border:1px solid transparent;font-size:.95rem;transition:all 0.2s}
+  .nav a.active,.nav a:hover{background:var(--surface2);border-color:var(--border)}
+  .main{padding:24px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .top h2{margin:0;font-size:1.6rem}
+  .top p{margin:6px 0 0;color:var(--muted)}
+  .btn{padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer;transition:all 0.2s;font-size:.95rem}
+  .btn:hover{background:var(--surface2);border-color:var(--border)}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn-primary:hover{background:#014e55;border-color:#014e55}
+  .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .btn-danger:hover{background:#8a2d38;border-color:#8a2d38}
+  .btn-secondary{background:var(--surface2);color:var(--text);border-color:var(--border)}
+  .btn-secondary:hover{background:#e1dfd9;border-color:var(--border)}
+  .btn-small{padding:8px 12px;font-size:.85rem}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:20px}
+  .cols2{grid-template-columns:1fr 1fr}
+  .label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .value{font-size:1.8rem;font-weight:700;margin-top:6px}
+  .status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+  .ok{background:#e8f1e3;color:var(--success)}.wait{background:#f5ebe3;color:var(--warn)}.bad{background:#f7e7ea;color:var(--danger)}.info{background:#ebf3f3;color:var(--primary)}
+  .table{width:100%;border-collapse:collapse;margin-top:12px}
+  .table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:.92rem;vertical-align:top}
+  .table th{color:var(--muted);font-weight:600}
+  .table tr:hover{background:var(--surface2)}
+  .field{display:grid;gap:8px;margin-bottom:14px}
+  .field label{font-weight:500;font-size:.9rem}
+  .field input,.field select,.field textarea{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;font:inherit;color:var(--text)}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(1,105,111,0.1)}
+  .actions{display:flex;gap:8px;justify-content:flex-end}
+  .muted{color:var(--muted)}
+  
+  /* Modal */
+  .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+  .modal.active{display:flex}
+  .modal-content{background:var(--surface);border-radius:var(--radius-lg);padding:28px;max-width:500px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px rgba(0,0,0,0.15)}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .modal-header h3{margin:0;font-size:1.3rem}
+  .close-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+  .close-btn:hover{color:var(--text)}
+  .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:16px;border-top:1px solid var(--border)}
+  
+  /* Alert */
+  .alert{padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;font-size:.92rem}
+  .alert-success{background:#e8f1e3;color:var(--success);border:1px solid #d1e6c4}
+  .alert-danger{background:#f7e7ea;color:var(--danger);border:1px solid #f0d4da}
+  .alert-info{background:#ebf3f3;color:var(--primary);border:1px solid #d6e7e9}
+  
+  /* Loading */
+  .loading{opacity:0.6;pointer-events:none}
+  .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  
+  /* Search & Filter */
+  .search-box{display:flex;gap:12px;margin-bottom:20px}
+  .search-box input{flex:1;padding:12px 14px;border-radius:var(--radius);border:1px solid var(--border);background:#fff;font:inherit}
+  .search-box input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(1,105,111,0.1)}
+  
+  @media(max-width:980px){
+    .app{grid-template-columns:1fr}
+    .sidebar{border-right:0;border-bottom:1px solid var(--border);position:relative;height:auto}
+    .cols2{grid-template-columns:1fr}
+    .table{font-size:.85rem}
+    .table th,.table td{padding:8px 6px}
+  }
+  
+  @media(max-width:640px){
+    .search-box{flex-direction:column}
+    .actions{flex-direction:column}
+    .actions .btn{width:100%}
+    .table{display:block;overflow-x:auto}
+  }
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="10" width="20" height="44" rx="8" stroke="currentColor" stroke-width="4"/><rect x="36" y="10" width="20" height="28" rx="8" stroke="currentColor" stroke-width="4"/></svg>
+        <div><h1>Pegawaiku</h1><p id="userRole">Admin SDM</p></div>
+      </div>
+      <nav class="nav">
+        <a href="./admin-dashboard.html">Dashboard</a>
+        <a href="./admin-users.html" class="active">Manajemen User</a>
+        <a href="./admin-pegawai.html">Data Pegawai</a>
+        <a href="./admin-presensi.html">Presensi</a>
+        <a href="./admin-cuti.html">Cuti / Izin</a>
+        <a href="./admin-laporan.html">Laporan</a>
+        <a href="./admin-program.html">Program & Anggaran</a>
+      </nav>
+    </aside>
+    
+    <main class="main">
+      <div class="top">
+        <div>
+          <h2>Manajemen User</h2>
+          <p>Kelola akun pengguna sistem Pegawaiku</p>
+        </div>
+        <div style="display:flex;gap:12px">
+          <button class="btn" id="logoutBtn" onclick="logout()">Logout</button>
+        </div>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+          <h3 style="margin:0">Daftar User</h3>
+          <button class="btn btn-primary" onclick="openAddUserModal()">+ Tambah User</button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Cari user berdasarkan nama atau email..." onkeyup="filterTable()">
+        </div>
+
+        <div style="overflow-x:auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Email / NIP</th>
+                <th>Role</th>
+                <th>Unit / Departemen</th>
+                <th>Dibuat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:40px"><span class="spinner"></span> Memuat data...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Tambah/Edit User -->
+  <div class="modal" id="userModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Tambah User Baru</h3>
+        <button class="close-btn" onclick="closeUserModal()">&times;</button>
+      </div>
+
+      <form id="userForm" onsubmit="saveUser(event)">
+        <div class="field">
+          <label for="userName">Nama Lengkap *</label>
+          <input type="text" id="userName" required>
+        </div>
+
+        <div class="field">
+          <label for="userEmail">Email *</label>
+          <input type="email" id="userEmail" required>
+        </div>
+
+        <div class="field">
+          <label for="userNip">NIP / ID *</label>
+          <input type="text" id="userNip" required>
+        </div>
+
+        <div class="field">
+          <label for="userPassword">Password *</label>
+          <input type="password" id="userPassword" required>
+          <small class="muted" id="passwordHint" style="display:none">Biarkan kosong untuk tidak mengubah password</small>
+        </div>
+
+        <div class="field">
+          <label for="userRole">Role *</label>
+          <select id="userRole" required>
+            <option value="">-- Pilih Role --</option>
+            <option value="admin">Admin SDM</option>
+            <option value="pegawai">Pegawai</option>
+            <option value="pimpinan">Pimpinan</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="userDept">Unit / Departemen</label>
+          <input type="text" id="userDept" placeholder="Contoh: Kepegawaian, Keuangan, Program">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Detail User -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="detailName"></h3>
+        <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+      </div>
+
+      <div id="detailContent"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDetailModal()">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="editUser()">Edit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Hapus -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Konfirmasi Hapus User</h3>
+        <button class="close-btn" onclick="closeDeleteModal()">&times;</button>
+      </div>
+
+      <p id="deleteMessage"></p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let allUsers = [];
+
+    // Check authentication on page load
+    window.addEventListener('load', async () => {
+      await checkAuth();
+      await loadUsers();
+    });
+
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await response.json();
+        if (data.user.role !== 'admin') {
+          alert('Akses ditolak. Hanya admin yang dapat mengakses halaman ini.');
+          window.location.href = '/';
+        }
+      } catch (error) {
+        window.location.href = '/login.html';
+      }
+    }
+
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/users');
+        if (!response.ok) throw new Error('Gagal memuat data user');
+        
+        const data = await response.json();
+        allUsers = data.users;
+        renderUserTable();
+      } catch (error) {
+        showAlert(error.message, 'danger');
+        console.error(error);
+      }
+    }
+
+    function renderUserTable() {
+      const tbody = document.getElementById('userTableBody');
+      
+      if (allUsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px">Tidak ada user</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = allUsers.map(user => `
+        <tr>
+          <td><strong>${user.name}</strong></td>
+          <td>
+            ${user.email}<br>
+            <small class="muted">${user.nip}</small>
+          </td>
+          <td>
+            <span class="status ${getRoleStatus(user.role)}">${getRoleLabel(user.role)}</span>
+          </td>
+          <td>${user.department || '-'}</td>
+          <td><small class="muted">${formatDate(user.createdAt)}</small></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-small" onclick="viewUser('${user.id}')">Lihat</button>
+              <button class="btn btn-small" onclick="editUserById('${user.id}')">Edit</button>
+              <button class="btn btn-small btn-danger" onclick="deleteUserModal('${user.id}')">Hapus</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function getRoleLabel(role) {
+      const labels = {
+        'admin': 'Admin',
+        'pegawai': 'Pegawai',
+        'pimpinan': 'Pimpinan'
+      };
+      return labels[role] || role;
+    }
+
+    function getRoleStatus(role) {
+      if (role === 'admin') return 'danger';
+      if (role === 'pimpinan') return 'warn';
+      return 'ok';
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
+
+    function filterTable() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allUsers.filter(user => 
+        user.name.toLowerCase().includes(searchTerm) || 
+        user.email.toLowerCase().includes(searchTerm) ||
+        user.nip.toLowerCase().includes(searchTerm)
+      );
+      
+      allUsers = [...filtered];
+      renderUserTable();
+      allUsers = [...allUsers]; // Restore
+      loadUsers();
+    }
+
+    function openAddUserModal() {
+      currentUserId = null;
+      document.getElementById('modalTitle').textContent = 'Tambah User Baru';
+      document.getElementById('passwordHint').style.display = 'none';
+      document.getElementById('userPassword').required = true;
+      document.getElementById('userForm').reset();
+      document.getElementById('userModal').classList.add('active');
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.remove('active');
+      document.getElementById('userForm').reset();
+      currentUserId = null;
+    }
+
+    async function saveUser(event) {
+      event.preventDefault();
+
+      const userData = {
+        name: document.getElementById('userName').value,
+        email: document.getElementById('userEmail').value,
+        nip: document.getElementById('userNip').value,
+        password: document.getElementById('userPassword').value,
+        role: document.getElementById('userRole').value,
+        department: document.getElementById('userDept').value
+      };
+
+      try {
+        const button = event.target.querySelector('button[type="submit"]');
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner"></span> Menyimpan...';
+
+        let response;
+        if (currentUserId) {
+          // Update user
+          response = await fetch(`/api/users/${currentUserId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+          });
+        } else {
+          // Create user
+          response = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+          });
+        }
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Gagal menyimpan user');
+        }
+
+        const data = await response.json();
+        showAlert(data.message, 'success');
+        closeUserModal();
+        loadUsers();
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      } finally {
+        const button = event.target.querySelector('button[type="submit"]');
+        button.disabled = false;
+        button.innerHTML = 'Simpan';
+      }
+    }
+
+    async function viewUser(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      currentUserId = userId;
+
+      document.getElementById('detailName').textContent = user.name;
+      document.getElementById('detailContent').innerHTML = `
+        <div class="field">
+          <label>Email</label>
+          <input type="text" value="${user.email}" disabled>
+        </div>
+        <div class="field">
+          <label>NIP / ID</label>
+          <input type="text" value="${user.nip}" disabled>
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <input type="text" value="${getRoleLabel(user.role)}" disabled>
+        </div>
+        <div class="field">
+          <label>Departemen</label>
+          <input type="text" value="${user.department || '-'}" disabled>
+        </div>
+        <div class="field">
+          <label>Dibuat pada</label>
+          <input type="text" value="${formatDate(user.createdAt)}" disabled>
+        </div>
+      `;
+
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('active');
+      currentUserId = null;
+    }
+
+    async function editUserById(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      currentUserId = userId;
+
+      document.getElementById('modalTitle').textContent = 'Edit User';
+      document.getElementById('passwordHint').style.display = 'block';
+      document.getElementById('userPassword').required = false;
+      document.getElementById('userPassword').placeholder = 'Kosongkan untuk tidak mengubah password';
+
+      document.getElementById('userName').value = user.name;
+      document.getElementById('userEmail').value = user.email;
+      document.getElementById('userNip').value = user.nip;
+      document.getElementById('userRole').value = user.role;
+      document.getElementById('userDept').value = user.department || '';
+
+      closeDetailModal();
+      document.getElementById('userModal').classList.add('active');
+    }
+
+    function editUser() {
+      closeDetailModal();
+      editUserById(currentUserId);
+    }
+
+    function deleteUserModal(userId) {
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      currentUserId = userId;
+      document.getElementById('deleteMessage').textContent = `Apakah Anda yakin ingin menghapus user "${user.name}" (${user.email})?`;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      currentUserId = null;
+    }
+
+    async function confirmDelete() {
+      try {
+        const button = event.target;
+        button.disabled = true;
+        button.innerHTML = '<span class="spinner"></span> Menghapus...';
+
+        const response = await fetch(`/api/users/${currentUserId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Gagal menghapus user');
+        }
+
+        const data = await response.json();
+        showAlert(data.message, 'success');
+        closeDeleteModal();
+        loadUsers();
+      } catch (error) {
+        showAlert(error.message, 'danger');
+      } finally {
+        const button = event.target;
+        button.disabled = false;
+        button.innerHTML = 'Hapus';
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
