@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pegawaiku - Manajemen User</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+<style>
+  :root{--bg:#f7f6f2;--surface:#fbfbf9;--surface2:#f1efe9;--border:#d4d1ca;--text:#28251d;--muted:#6f6d67;--primary:#01696f;--success:#437a22;--warn:#964219;--danger:#a13544;--radius:14px;--radius-lg:16px;--shadow:0 2px 12px rgba(0,0,0,0.08)}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{padding:24px;background:var(--surface);border-right:1px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+  .brand svg{width:38px;height:38px;color:var(--primary)}
+  .brand h1{margin:0;font-size:1.25rem}
+  .brand p{margin:0;color:var(--muted);font-size:.8rem}
+  .nav a{display:block;padding:12px 14px;border-radius:var(--radius);text-decoration:none;color:var(--text);margin-bottom:6px;border:1px solid transparent;font-size:.95rem;transition:all 0.2s}
+  .nav a.active,.nav a:hover{background:var(--surface2);border-color:var(--border)}
+  .main{padding:24px;overflow-y:auto}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .top h2{margin:0;font-size:1.6rem}
+  .top p{margin:6px 0 0;color:var(--muted)}
+  .btn{padding:12px 16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-weight:600;cursor:pointer;transition:all 0.2s;font-size:.95rem}
+  .btn:hover{background:var(--surface2);border-color:var(--border)}
+  .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .btn-primary:hover{background:#014e55}
+  .btn-success{background:var(--success);color:#fff;border-color:var(--success)}
+  .btn-success:hover{background:#35632a}
+  .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+  .btn-danger:hover{background:#8a2a37}
+  .btn-small{padding:8px 12px;font-size:0.85rem}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow)}
+  .grid{display:grid;gap:20px}
+  .cols2{grid-template-columns:1fr 1fr}
+  .cols3{grid-template-columns:repeat(3,1fr)}
+  .label{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .status{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+  .ok{background:#e8f1e3;color:var(--success)}.wait{background:#f5ebe3;color:var(--warn)}.bad{background:#f7e7ea;color:var(--danger)}.info{background:#ebf3f3;color:var(--primary)}
+  .table{width:100%;border-collapse:collapse;margin-top:12px}
+  .table th,.table td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border);font-size:.92rem;vertical-align:top}
+  .table th{color:var(--muted);font-weight:600}
+  .table tr:hover{background:var(--surface2)}
+  .filter-group{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+  .filter-group input,.filter-group select{padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);background:#fff;font:inherit;color:var(--text)}
+  .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+  .modal.active{display:flex}
+  .modal-content{background:var(--surface);border-radius:var(--radius-lg);padding:28px;max-width:600px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 25px rgba(0,0,0,0.15)}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+  .modal-header h3{margin:0;font-size:1.3rem}
+  .close-btn{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted)}
+  .field{display:grid;gap:8px;margin-bottom:14px}
+  .field label{font-weight:500;font-size:.9rem}
+  .field input,.field select,.field textarea{padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:#fff;font:inherit;color:var(--text);width:100%;box-sizing:border-box}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(1,105,111,0.1)}
+  .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:.75rem;font-weight:600}
+  .badge-admin{background:#8a2a37;color:#fff}
+  .badge-pegawai{background:#01696f;color:#fff}
+  .badge-pimpinan{background:#437a22;color:#fff}
+  .badge-active{background:#e8f1e3;color:var(--success)}
+  .badge-inactive{background:#f7e7ea;color:var(--danger)}
+  .muted{color:var(--muted)}
+  .alert{padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;font-size:.92rem}
+  .alert-success{background:#e8f1e3;color:var(--success);border:1px solid #d1e6c4}
+  .alert-danger{background:#f7e7ea;color:var(--danger);border:1px solid #f0d4da}
+  .alert-warning{background:#f5ebe3;color:var(--warn);border:1px solid #f0e4d4}
+  .alert-info{background:#ebf3f3;color:var(--primary);border:1px solid #d6e7e9}
+  .user-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .stat-card{background:var(--surface2);padding:16px;border-radius:var(--radius);text-align:center}
+  .stat-value{font-size:2rem;font-weight:700;color:var(--primary)}
+  .stat-label{font-size:0.9rem;color:var(--muted);margin-top:4px}
+  .user-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface2);border-radius:var(--radius);margin-bottom:8px}
+  .user-info{flex:1}
+  .user-name{font-weight:600}
+  .user-details{font-size:0.9rem;color:var(--muted);margin-top:2px}
+  .user-actions{display:flex;gap:8px}
+  
+  @media(max-width:980px){
+    .app{grid-template-columns:1fr}
+    .sidebar{border-right:0;border-bottom:1px solid var(--border);position:relative;height:auto}
+    .cols2,.cols3{grid-template-columns:1fr}
+    .table{font-size:0.85rem}
+    .table th,.table td{padding:8px 6px}
+  }
+</style>
+
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="10" width="20" height="44" rx="8" stroke="currentColor" stroke-width="4"/><rect x="36" y="10" width="20" height="28" rx="8" stroke="currentColor" stroke-width="4"/></svg>
+        <div><h1>Pegawaiku</h1><p>Admin SDM</p></div>
+      </div>
+      <nav class="nav">
+        <a href="./admin-dashboard.html">Dashboard</a>
+        <a href="./admin-pegawai.html">Data Pegawai</a>
+        <a class="active" href="./admin-user.html">Manajemen User</a>
+        <a href="./admin-presensi.html">Presensi</a>
+        <a href="./admin-cuti.html">Cuti / Izin</a>
+        <a href="./admin-laporan.html">Laporan</a>
+        <a href="./admin-program.html">Program & Anggaran</a>
+      </nav>
+    </aside>
+    
+    <main class="main">
+      <div class="top">
+        <div>
+          <h2>Manajemen User</h2>
+          <p>Kelola akun user Admin, Pegawai, dan Pimpinan</p>
+        </div>
+        <button class="btn btn-primary" onclick="openAddUserModal()">+ Tambah User Baru</button>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <!-- User Statistics -->
+      <div class="user-stats">
+        <div class="stat-card">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Total Admin</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">48</div>
+          <div class="stat-label">Total Pegawai</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Total Pimpinan</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">59</div>
+          <div class="stat-label">Total User</div>
+        </div>
+      </div>
+
+      <!-- Filter & Search -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="filter-group">
+          <input type="text" id="searchInput" placeholder="Cari nama, email, atau NIP..." onkeyup="filterUsers()">
+          <select id="roleFilter" onchange="filterUsers()">
+            <option value="">Semua Role</option>
+            <option value="admin">Admin SDM</option>
+            <option value="pegawai">Pegawai</option>
+            <option value="pimpinan">Pimpinan</option>
+          </select>
+          <select id="statusFilter" onchange="filterUsers()">
+            <option value="">Semua Status</option>
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Non-Aktif</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- User List Table -->
+      <div class="card">
+        <h3 style="margin-top:0">Daftar User</h3>
+        <div style="overflow-x:auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Email / NIP</th>
+                <th>Role</th>
+                <th>Unit</th>
+                <th>Status</th>
+                <th>Dibuat</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <!-- Admin Users -->
+              <tr class="user-row" data-role="admin" data-status="aktif">
+                <td>
+                  <strong>Reza Oklavian</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0001/KD/2024</span>
+                </td>
+                <td>reza.oklavian@kemendikdasmen.go.id</td>
+                <td><span class="badge badge-admin">Admin SDM</span></td>
+                <td>Direktorat</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>15 Jan 2024</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('reza')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('reza')">Hapus</button>
+                </td>
+              </tr>
+
+              <tr class="user-row" data-role="admin" data-status="aktif">
+                <td>
+                  <strong>Susi Astuti</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0002/KD/2024</span>
+                </td>
+                <td>susi.astuti@kemendikdasmen.go.id</td>
+                <td><span class="badge badge-admin">Admin SDM</span></td>
+                <td>Direktorat</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>20 Jan 2024</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('susi')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('susi')">Hapus</button>
+                </td>
+              </tr>
+
+              <!-- Pegawai Users -->
+              <tr class="user-row" data-role="pegawai" data-status="aktif">
+                <td>
+                  <strong>Ayu Lestari</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0010/KD/2021</span>
+                </td>
+                <td>ayu.lestari@kursus.go.id</td>
+                <td><span class="badge badge-pegawai">Pegawai</span></td>
+                <td>Kepegawaian</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>15 Mar 2021</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('ayu')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('ayu')">Hapus</button>
+                </td>
+              </tr>
+
+              <tr class="user-row" data-role="pegawai" data-status="aktif">
+                <td>
+                  <strong>Rizky Maulana</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0025/KD/2023</span>
+                </td>
+                <td>rizky.maulana@kursus.go.id</td>
+                <td><span class="badge badge-pegawai">Pegawai</span></td>
+                <td>Program</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>10 Jun 2023</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('rizky')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('rizky')">Hapus</button>
+                </td>
+              </tr>
+
+              <tr class="user-row" data-role="pegawai" data-status="aktif">
+                <td>
+                  <strong>Dewi Kartika</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0032/KD/2024</span>
+                </td>
+                <td>dewi.kartika@kursus.go.id</td>
+                <td><span class="badge badge-pegawai">Pegawai</span></td>
+                <td>Keuangan</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>02 Feb 2024</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('dewi')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('dewi')">Hapus</button>
+                </td>
+              </tr>
+
+              <!-- Pimpinan Users -->
+              <tr class="user-row" data-role="pimpinan" data-status="aktif">
+                <td>
+                  <strong>Budi Santoso</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0005/KD/2020</span>
+                </td>
+                <td>budi.santoso@kursus.go.id</td>
+                <td><span class="badge badge-pimpinan">Pimpinan</span></td>
+                <td>Program</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>05 Mar 2020</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('budi')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('budi')">Hapus</button>
+                </td>
+              </tr>
+
+              <tr class="user-row" data-role="pimpinan" data-status="aktif">
+                <td>
+                  <strong>Heri Gunawan</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0007/KD/2021</span>
+                </td>
+                <td>heri.gunawan@kursus.go.id</td>
+                <td><span class="badge badge-pimpinan">Pimpinan</span></td>
+                <td>Keuangan</td>
+                <td><span class="status ok">Aktif</span></td>
+                <td>12 Jul 2021</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('heri')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('heri')">Hapus</button>
+                </td>
+              </tr>
+
+              <tr class="user-row" data-role="pegawai" data-status="nonaktif">
+                <td>
+                  <strong>Siti Rahmawati</strong><br/>
+                  <span class="muted" style="font-size:0.85rem">0015/KD/2022</span>
+                </td>
+                <td>siti.rahmawati@kursus.go.id</td>
+                <td><span class="badge badge-pegawai">Pegawai</span></td>
+                <td>Monitoring</td>
+                <td><span class="status bad">Non-Aktif</span></td>
+                <td>08 May 2022</td>
+                <td>
+                  <button class="btn btn-small" onclick="editUser('siti')">Edit</button>
+                  <button class="btn btn-small btn-danger" onclick="deleteUser('siti')">Hapus</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card" style="margin-top:28px">
+        <h3 style="margin-top:0">⚡ Aksi Cepat</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+          <button class="btn btn-primary" onclick="openAddUserModal()">➕ Tambah User Baru</button>
+          <button class="btn" onclick="exportUserList()">📥 Export Daftar User</button>
+          <button class="btn" onclick="bulkResetPassword()">🔄 Reset Password Masal</button>
+          <button class="btn" onclick="generateUserReport()">📊 Generate User Report</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add/Edit User -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Tambah User Baru</h3>
+        <button class="close-btn" onclick="closeUserModal()">&times;</button>
+      </div>
+      <form id="userForm" style="display:grid;gap:16px">
+        <div class="field">
+          <label>Nama Lengkap *</label>
+          <input type="text" id="inputName" placeholder="Nama lengkap" required>
+        </div>
+
+        <div class="field">
+          <label>NIP / ID Pegawai *</label>
+          <input type="text" id="inputNIP" placeholder="0001/KD/2024" required>
+        </div>
+
+        <div class="field">
+          <label>Email *</label>
+          <input type="email" id="inputEmail" placeholder="email@kursus.go.id" required>
+        </div>
+
+        <div class="field">
+          <label>Role / Posisi *</label>
+          <select id="inputRole" required>
+            <option value="">-- Pilih Role --</option>
+            <option value="admin">Admin SDM</option>
+            <option value="pegawai">Pegawai</option>
+            <option value="pimpinan">Pimpinan</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Unit / Departemen *</label>
+          <select id="inputUnit" required>
+            <option value="">-- Pilih Unit --</option>
+            <option value="direktorat">Direktorat</option>
+            <option value="kepegawaian">Kepegawaian</option>
+            <option value="program">Program</option>
+            <option value="keuangan">Keuangan</option>
+            <option value="monitoring">Monitoring</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Password *</label>
+          <input type="password" id="inputPassword" placeholder="Password (min 8 karakter)" required>
+          <small class="muted">Password minimal 8 karakter. Kombinasi huruf, angka, dan simbol direkomendasikan.</small>
+        </div>
+
+        <div class="field">
+          <label>Konfirmasi Password *</label>
+          <input type="password" id="inputPasswordConfirm" placeholder="Konfirmasi password" required>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select id="inputStatus">
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Non-Aktif</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Catatan (opsional)</label>
+          <textarea id="inputNotes" rows="3" placeholder="Catatan tambahan..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px">
+          <button type="button" class="btn" onclick="closeUserModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit User -->
+  <div id="editUserModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit User: <span id="editUserName"></span></h3>
+        <button class="close-btn" onclick="closeEditUserModal()">&times;</button>
+      </div>
+      <form id="editUserForm" style="display:grid;gap:16px">
+        <div class="field">
+          <label>Nama Lengkap</label>
+          <input type="text" id="editInputName" placeholder="Nama lengkap">
+        </div>
+
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="editInputEmail" placeholder="email@kursus.go.id">
+        </div>
+
+        <div class="field">
+          <label>Role</label>
+          <select id="editInputRole">
+            <option value="admin">Admin SDM</option>
+            <option value="pegawai">Pegawai</option>
+            <option value="pimpinan">Pimpinan</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Unit / Departemen</label>
+          <select id="editInputUnit">
+            <option value="direktorat">Direktorat</option>
+            <option value="kepegawaian">Kepegawaian</option>
+            <option value="program">Program</option>
+            <option value="keuangan">Keuangan</option>
+            <option value="monitoring">Monitoring</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Status</label>
+          <select id="editInputStatus">
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Non-Aktif</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Ganti Password (kosongkan jika tidak ingin mengubah)</label>
+          <input type="password" id="editInputPassword" placeholder="Password baru">
+        </div>
+
+        <div class="field">
+          <label>Catatan</label>
+          <textarea id="editInputNotes" rows="3" placeholder="Catatan tambahan..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px">
+          <button type="button" class="btn" onclick="closeEditUserModal()">Batal</button>
+          <button type="submit" class="btn btn-primary">Update User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('load', async () => {
+      await checkAuth();
+    });
+
+    async function checkAuth() {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) {
+          window.location.href = '/login.html';
+          return;
+        }
+        const data = await response.json();
+        if (data.user.role !== 'admin') {
+          alert('Halaman ini hanya untuk Admin');
+          window.location.href = '/';
+        }
+      } catch (error) {
+        window.location.href = '/login.html';
+      }
+    }
+
+    function openAddUserModal() {
+      document.getElementById('modalTitle').textContent = 'Tambah User Baru';
+      document.getElementById('userForm').reset();
+      document.getElementById('userModal').classList.add('active');
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.remove('active');
+      document.getElementById('userForm').reset();
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserModal').classList.remove('active');
+      document.getElementById('editUserForm').reset();
+    }
+
+    function filterUsers() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const role = document.getElementById('roleFilter').value;
+      const status = document.getElementById('statusFilter').value;
+
+      const rows = document.querySelectorAll('.user-row');
+      rows.forEach(row => {
+        let showRow = true;
+
+        // Filter by search
+        if (search) {
+          const text = row.textContent.toLowerCase();
+          showRow = text.includes(search);
+        }
+
+        // Filter by role
+        if (showRow && role && !row.getAttribute('data-role').includes(role)) {
+          showRow = false;
+        }
+
+        // Filter by status
+        if (showRow && status && !row.getAttribute('data-status').includes(status)) {
+          showRow = false;
+        }
+
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+
+    function editUser(userId) {
+      document.getElementById('editUserName').textContent = 'User ID: ' + userId;
+      document.getElementById('editUserModal').classList.add('active');
+      // In production, fetch user data and populate form
+      console.log('Editing user:', userId);
+    }
+
+    function deleteUser(userId) {
+      if (confirm('Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.')) {
+        showAlert('User ' + userId + ' telah dihapus', 'success');
+        // In production, make API call to delete user
+        console.log('Deleting user:', userId);
+      }
+    }
+
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('inputName').value;
+      const nip = document.getElementById('inputNIP').value;
+      const email = document.getElementById('inputEmail').value;
+      const role = document.getElementById('inputRole').value;
+      const unit = document.getElementById('inputUnit').value;
+      const password = document.getElementById('inputPassword').value;
+      const passwordConfirm = document.getElementById('inputPasswordConfirm').value;
+
+      // Validation
+      if (!name || !nip || !email || !role || !unit || !password) {
+        showAlert('Lengkapi semua field yang diperlukan', 'danger');
+        return;
+      }
+
+      if (password !== passwordConfirm) {
+        showAlert('Password tidak sesuai', 'danger');
+        return;
+      }
+
+      if (password.length < 8) {
+        showAlert('Password minimal 8 karakter', 'danger');
+        return;
+      }
+
+      // Success
+      showAlert('✓ User ' + name + ' berhasil ditambahkan!', 'success');
+      closeUserModal();
+
+      // In production, make API call to create user
+      console.log({
+        name, nip, email, role, unit, password,
+        status: document.getElementById('inputStatus').value,
+        notes: document.getElementById('inputNotes').value
+      });
+    });
+
+    document.getElementById('editUserForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('editInputName').value;
+      const email = document.getElementById('editInputEmail').value;
+      const role = document.getElementById('editInputRole').value;
+
+      if (!name || !email || !role) {
+        showAlert('Lengkapi field yang diperlukan', 'danger');
+        return;
+      }
+
+      showAlert('✓ User berhasil diupdate!', 'success');
+      closeEditUserModal();
+
+      // In production, make API call to update user
+      console.log({
+        name, email, role,
+        unit: document.getElementById('editInputUnit').value,
+        status: document.getElementById('editInputStatus').value,
+        notes: document.getElementById('editInputNotes').value
+      });
+    });
+
+    function exportUserList() {
+      showAlert('📥 Mengexport daftar user... (Fitur akan dikembangkan)', 'info');
+    }
+
+    function bulkResetPassword() {
+      if (confirm('Reset password untuk semua user yang dipilih? Mereka akan menerima email dengan password baru.')) {
+        showAlert('🔄 Sedang mereset password... (Fitur akan dikembangkan)', 'info');
+      }
+    }
+
+    function generateUserReport() {
+      showAlert('📊 Generating user report... (Fitur akan dikembangkan)', 'info');
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertContainer = document.getElementById('alertContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.textContent = message;
+      alertContainer.appendChild(alert);
+
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/login.html';
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  </script>
+</body>
+</html>
